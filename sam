@@ -174,9 +174,18 @@ cd /etc/openvpn/
 wget -O /etc/openvpn/server.tcp.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-tcp.conf"
 wget -O /etc/openvpn/server.udp.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-udp.conf"
 wget -O /etc/openvpn/server.ssl.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-ssl.conf"
+wget -O /etc/openvpn/server.tcp1.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-tcp1.conf"
+wget -O /etc/openvpn/server.tcp2.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-tcp2.conf"
+wget -O /etc/openvpn/server.udp1.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-udp1.conf"
+wget -O /etc/openvpn/server.udp2.conf "https://raw.githubusercontent.com/azalea910512/sep/main/server-udp2.conf"
+
 systemctl start openvpn@server.tcp
 systemctl start openvpn@server.udp
 systemctl start openvpn@server.ssl
+systemctl start openvpn@server.tcp1
+systemctl start openvpn@server.tcp2
+systemctl start openvpn@server.udp1
+systemctl start openvpn@server.udp2
 sysctl -w net.ipv4.ip_forward=1
 sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 iptables -t nat -I POSTROUTING -s 192.168.100.0/24 -o eth0 -j MASQUERADE
@@ -247,6 +256,50 @@ echo '<tls-auth>' >> /etc/openvpn/ssl.ovpn
 cat /etc/openvpn/tls-auth.key >> /etc/openvpn/ssl.ovpn
 echo '</tls-auth>' >> /etc/openvpn/ssl.ovpn
 cp ssl.ovpn /home/vps/public_html/
+
+cat > /etc/openvpn/sam.ovpn <<EOF1
+# Thanks for using this script, Enjoy Highspeed OpenVPN Service
+
+client
+dev tun
+proto tcp
+setenv FRIENDLY_NAME "Mac Quan Inc - VPN UDP"
+remote 127.0.0.1 1101
+route $MYIP 255.255.255.255 net_gateway
+route-method exe
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+comp-lzo
+cipher AES-256-CBC
+auth SHA256
+push "redirect-gateway def1 bypass-dhcp"
+verb 3
+push-peer-info
+ping 10
+ping-restart 60
+hand-window 70
+server-poll-timeout 4
+reneg-sec 2592000
+sndbuf 0
+rcvbuf 0
+remote-cert-tls server
+key-direction 1
+auth-user-pass
+<ca>
+$(cat /etc/openvpn/ca.crt)
+</ca>
+<cert>
+$(cat /etc/openvpn/client.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/client.key)
+</key>
+<tls-auth>
+$(cat /etc/openvpn/tls-auth.key)
+</tls-auth>
+EOF1
 /etc/init.d/openvpn restart
 
 # install badvpn
