@@ -257,7 +257,8 @@ cat /etc/openvpn/tls-auth.key >> /etc/openvpn/ssl.ovpn
 echo '</tls-auth>' >> /etc/openvpn/ssl.ovpn
 cp ssl.ovpn /home/vps/public_html/
 
-cat > /etc/openvpn/sam.ovpn <<EOF1
+mkdir -p /home/vps/public_html
+cat > /home/vps/public_html/sam.ovpn <<EOF1
 # Thanks for using this script, Enjoy Highspeed OpenVPN Service
 
 client
